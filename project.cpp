@@ -22,11 +22,15 @@ void initSides() {
 				sides[color][x][y] = color;
 }
 
-void simpleRotate(int front[3][3], int bottom[3][3], int top[3][3], int left[3][3], int right[3][3], int FRONT[3][3], int BOTTOM[3][3], int TOP[3][3], int LEFT[3][3], int RIGHT[3][3]) {
+void simpleRotate(int dir, int front[3][3], int bottom[3][3], int top[3][3], int left[3][3], int right[3][3], int FRONT[3][3], int BOTTOM[3][3], int TOP[3][3], int LEFT[3][3], int RIGHT[3][3]) {
 	for (int y = 0; y < 3; y++) {
 		for (int x = 0; x < 3; x++) {
 			// Simple clockwise rotation
-			front[x][2 - y] = FRONT[y][x];
+			if (dir == 0)
+				front[2 - x][y] = FRONT[y][x];
+			else
+				front[x][2 - y] = FRONT[y][x];
+
 			// Copy the other arrays while we're here
 			bottom[x][y] = BOTTOM[x][y];
 			top[x][y] = TOP[x][y];
@@ -49,24 +53,17 @@ void simpleUpdate(int front[3][3], int bottom[3][3], int top[3][3], int left[3][
 	}
 }
 
-void rotateFixed(int x, int y, int bottom[3][3], int left[3][3], int top[3][3], int right[3][3], int BOTTOM[3][3], int LEFT[3][3], int TOP[3][3], int RIGHT[3][3]) {
-	bottom[x][y] = RIGHT[x][y]; // right -> bottom
-	left[x][y] = BOTTOM[x][y]; // bottom -> left
-	top[x][y] = LEFT[x][y]; // left -> top
-	right[x][y] = TOP[x][y]; // top -> right
-}
-
 // Rotates the face (e.g. front or back) clockwise
 void clockwiseFace(int layer, int FRONT[3][3], int BOTTOM[3][3], int TOP[3][3], int LEFT[3][3], int RIGHT[3][3]) {
 	int front[3][3], bottom[3][3], top[3][3], left[3][3], right[3][3];
 
-	simpleRotate(front, bottom, top, left, right, FRONT, BOTTOM, TOP, LEFT, RIGHT);
+	simpleRotate(layer, front, bottom, top, left, right, FRONT, BOTTOM, TOP, LEFT, RIGHT);
 
 	for (int i = 0; i < 3; i++) {
-		bottom[i][2 - layer] = RIGHT[0][i]; // right -> bottom
-		left[2][i] = BOTTOM[abs(2 - i - layer)][2 - layer]; // bottom -> left
-		top[abs(layer - i)][layer] = LEFT[2][i]; // left -> top
-		right[0][i] = TOP[i][layer]; // top -> right
+		bottom[abs(2 - layer - i)][2 - layer] = RIGHT[0][i]; // right -> bottom
+		left[2][2 - i] = BOTTOM[abs(2 - i - layer)][2 - layer]; // bottom -> left
+		top[abs(2 - layer - i)][layer] = LEFT[2][i]; // left -> top
+		right[0][abs(layer - i)] = TOP[i][layer]; // top -> right
 	}
 
 	simpleUpdate(front, bottom, top, left, right, FRONT, BOTTOM, TOP, LEFT, RIGHT);
@@ -76,10 +73,15 @@ void clockwiseFace(int layer, int FRONT[3][3], int BOTTOM[3][3], int TOP[3][3], 
 void clockwiseVertical(int layer, int FRONT[3][3], int BOTTOM[3][3], int TOP[3][3], int LEFT[3][3], int RIGHT[3][3]) {
 	int front[3][3], bottom[3][3], top[3][3], left[3][3], right[3][3];
 
-	simpleRotate(front, bottom, top, left, right, FRONT, BOTTOM, TOP, LEFT, RIGHT);
+	simpleRotate(1, front, bottom, top, left, right, FRONT, BOTTOM, TOP, LEFT, RIGHT);
 
 	for (int i = 0; i < 3; i++)
-		rotateFixed(layer, i, bottom, left, top, right, BOTTOM, LEFT, TOP, RIGHT);
+	{		
+		bottom[2 - layer][abs(layer - i)] = RIGHT[2 - layer][i]; // right -> bottom
+		right[2 - layer][abs(layer - i)] = TOP[2 - layer][i]; // top -> right
+		left[2 - layer][abs(2 - layer - i)] = BOTTOM[2 - layer][i]; // bottom -> left
+		top[2 - layer][abs(2 - layer - i)] = LEFT[2 - layer][i]; // left -> top	
+	}
 
 	simpleUpdate(front, bottom, top, left, right, FRONT, BOTTOM, TOP, LEFT, RIGHT);
 }
@@ -88,48 +90,56 @@ void clockwiseVertical(int layer, int FRONT[3][3], int BOTTOM[3][3], int TOP[3][
 void clockwiseHorizontal(int layer, int FRONT[3][3], int BOTTOM[3][3], int TOP[3][3], int LEFT[3][3], int RIGHT[3][3]) {
 	int front[3][3], bottom[3][3], top[3][3], left[3][3], right[3][3];
 
-	simpleRotate(front, bottom, top, left, right, FRONT, BOTTOM, TOP, LEFT, RIGHT);
+	simpleRotate(0, front, bottom, top, left, right, FRONT, BOTTOM, TOP, LEFT, RIGHT);
 
 	for (int i = 0; i < 3; i++)
-		rotateFixed(i, layer, bottom, left, top, right, BOTTOM, LEFT, TOP, RIGHT);
+	{
+		bottom[i][2 - layer] = RIGHT[i][2 - layer]; // right -> bottom		
+		left[i][2 - layer] = BOTTOM[i][2 - layer]; // bottom -> left
+		top[2 - i][2 - layer] = LEFT[i][2 - layer]; // left -> top	
+		right[2 - i][2 - layer] = TOP[i][2 - layer]; // top -> right
+	}
 
 	simpleUpdate(front, bottom, top, left, right, FRONT, BOTTOM, TOP, LEFT, RIGHT);
 }
 
-void frontClockwise(int i = 1) {
+void frontClockwise(int i = 1) { // WHITE
 	// FRONT, BOTTOM, TOP, LEFT, RIGHT
+	// WHITE, ORANGE, RED, BLUE, GREEN
 	while (i-- > 0)
 		clockwiseFace(0, sides[0], sides[2], sides[3], sides[4], sides[5]);
 }
 
-void backClockwise(int i = 1) {
+void backClockwise(int i = 1) { // YELLOW
 	// FRONT, BOTTOM, TOP, LEFT, RIGHT
 	while (i-- > 0)
 		clockwiseFace(2, sides[1], sides[2], sides[3], sides[5], sides[4]);
 }
 
-void leftClockwise(int i = 1) {
+void leftClockwise(int i = 1) { // BLUE
 	// FRONT, BOTTOM, TOP, LEFT, RIGHT
+	// BLUE, ORANGE, RED, YELLOW, WHITE
 	while (i-- > 0)
 		clockwiseVertical(0, sides[4], sides[2], sides[3], sides[1], sides[0]);
 }
 
-void rightClockwise(int i = 1) {
+void rightClockwise(int i = 1) { // GREEN
 	// FRONT, BOTTOM, TOP, LEFT, RIGHT
 	while (i-- > 0)
 		clockwiseVertical(2, sides[5], sides[2], sides[3], sides[0], sides[1]);
 }
 
-void topClockwise(int i = 1) {
+void topClockwise(int i = 1) { // RED
 	// FRONT, BOTTOM, TOP, LEFT, RIGHT
+	// RED, YELLOW, WHITE, GREEN, BLUE
 	while (i-- > 0)
-		clockwiseHorizontal(2, sides[3], sides[0], sides[1], sides[4], sides[5]);
+		clockwiseHorizontal(0, sides[3], sides[1], sides[0], sides[5], sides[4]);
 }
 
-void bottomClockwise(int i = 1) {
+void bottomClockwise(int i = 1) { // ORNAGE
 	// FRONT, BOTTOM, TOP, LEFT, RIGHT
 	while (i-- > 0)
-		clockwiseHorizontal(0, sides[2], sides[1], sides[0], sides[4], sides[5]);
+		clockwiseHorizontal(2, sides[2], sides[1], sides[0], sides[4], sides[5]);
 }
 
 void scrambleSides() {
@@ -142,14 +152,14 @@ void scrambleSides() {
 	//bottomClockwise(2);	
 
 	//Pattern 2
-	leftClockwise(1);
-	rightClockwise(3); // lazy man's counterclockwise
-	frontClockwise(3);
-	backClockwise(1);
-	topClockwise(1);
-	bottomClockwise(3);
-	leftClockwise(1);
-	rightClockwise(3);
+	//leftClockwise(1);
+	//rightClockwise(3); // lazy man's counterclockwise
+	//frontClockwise(3);
+	//backClockwise(1);
+	//topClockwise(1);
+	//bottomClockwise(3);
+	//leftClockwise(1);
+	//rightClockwise(3);
 }
 
 void loadColor(int color) {
@@ -175,11 +185,11 @@ void loadColor(int color) {
 	}
 }
 
-void drawSides(bool drawLines = false) {
+void drawSides(bool drawLines = false, bool selectMode = false) {
 	glColor3f(0, 0, 0);
 	glColorMaterial(GL_FRONT, GL_DIFFUSE);
 	glEnable(GL_COLOR_MATERIAL);
-	glLineWidth(6);
+	glLineWidth(42 / r);
 	glBegin(GL_QUADS);
 	int x, y, z, side, i;
 	for (side = 0; side < 6; side++) {
@@ -190,6 +200,8 @@ void drawSides(bool drawLines = false) {
 				for (y = 0; y < 3; y++) {
 					if (!drawLines)
 						loadColor(sides[side][x][y]);
+					if (selectMode)
+						glLoadName(sides[side][x][y]);
 					glNormal3f(0, 0, z == 0 ? -1 : 1);
 					glVertex3f(x, y, z);
 					glVertex3f(x + 1, y, z);
@@ -205,6 +217,8 @@ void drawSides(bool drawLines = false) {
 				for (z = 0; z < 3; z++) {
 					if (!drawLines)
 						loadColor(sides[side][x][abs(i - z)]);
+					if (selectMode)
+						glLoadName(sides[side][x][abs(i - z)]);
 					glNormal3f(0, y == 0 ? -1 : 1, 0);
 					glVertex3f(x, y, z);
 					glVertex3f(x + 1, y, z);
@@ -220,6 +234,8 @@ void drawSides(bool drawLines = false) {
 				for (y = 0; y < 3; y++) {
 					if (!drawLines)
 						loadColor(sides[side][abs(i - z)][y]);
+					if (selectMode)
+						glLoadName(sides[side][abs(i - z)][y]);
 					glNormal3f(x == 0 ? -1 : 1, 0, 0);
 					glVertex3f(x, y + 1, z);
 					glVertex3f(x, y, z);
@@ -296,7 +312,7 @@ void onMouseMove(int x, int y) {
 	while (theta < 0)
 		theta += 360;
 
-	phi = clickPhi + (theta > 180 ? 1 : -1) * (360.0 / (double)winWidth)*(double)(x - clickX)*3.0;	
+	phi = clickPhi + (theta > 180 ? 1 : -1) * (360.0 / (double)winWidth)*(double)(x - clickX)*3.0;
 	phi = fmod((double)phi, 360);
 
 	eyePosition();
@@ -330,9 +346,39 @@ void mouse(int button, int state, int x, int y)
 	}
 }
 
-void SpecialKeys(int key, int x, int y) {	
+void keyboard(unsigned char key, int x, int y) {
+	switch (key) {
+	case 'w':
+		frontClockwise(); break;
+	case 'b':
+		leftClockwise(); break;
+	case 'r':
+		topClockwise(); break;
+	case 'g':
+		rightClockwise(); break;
+	case 'o':
+		bottomClockwise(); break;
+	case 'y':
+		backClockwise(); break;
+	case 'W':
+		frontClockwise(3); break;
+	case 'B':
+		leftClockwise(3); break;
+	case 'R':
+		topClockwise(3); break;
+	case 'G':
+		rightClockwise(3); break;
+	case 'O':
+		bottomClockwise(3); break;
+	case 'Y':
+		backClockwise(3); break;
+	}
+	glutPostRedisplay();
+}
+
+void SpecialKeys(int key, int x, int y) {
 	if (key == GLUT_KEY_UP) // Zoom in
-		r -= 0.2;	
+		r -= 0.2;
 	if (key == GLUT_KEY_DOWN) // Zoom out
 		r += 0.2;
 
@@ -387,6 +433,7 @@ int main(int argc, char **argv)
 
 	glutMouseFunc(mouse);
 
+	glutKeyboardFunc(keyboard);
 	glutSpecialFunc(SpecialKeys);
 
 	eyePosition();
