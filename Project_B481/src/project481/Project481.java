@@ -7,7 +7,6 @@ import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -25,25 +24,23 @@ import javafx.stage.Stage;
 
 public class Project481 extends Application
 {
-    ImageView topRow = new ImageView("file:src/project481/top_row.png");
-    ImageView middleRow = new ImageView("file:src/project481/middle_row.png");
-    ImageView bottomRow = new ImageView("file:src/project481/bottom_row.png");
-    
-    ImageView rightFrontColumn = new ImageView("file:src/project481/right_front_column.png");
-    ImageView middleFrontColumn = new ImageView("file:src/project481/middle_front_column.png");
-    ImageView leftFrontColumn = new ImageView("file:src/project481/left_front_column.png");
-    
-    ImageView rightSideColumn = new ImageView("file:src/project481/right_side_column.png");
-    ImageView middleSideColumn = new ImageView("file:src/project481/middle_side_column.png");
-    ImageView leftSideColumn = new ImageView("file:src/project481/left_side_column.png");
-    
     int rotate = 0;
     PointLight light = new PointLight();
-    PointLight light2 = new PointLight();
+    //PointLight light2 = new PointLight();
+    //PointLight light3 = new PointLight();
     
     Pane root = new Pane(); //Root created to hold all objects/Panes
     Pane menuPane = new Pane(); //Menu Pane created to hold directions on how to play game
     Pane cubePane = new Pane(); //Cube Pane created to hold Rubik's cube
+    Pane topRowPane = new Pane(); //Pane for Top Row Tip
+    Pane middleRowPane = new Pane(); //Pane for Middle Row Tip
+    Pane bottomRowPane = new Pane(); //Pane for Bottom Row Tip
+    Pane frontLeftColumnPane = new Pane(); //Pane for Front Left Column Tip
+    Pane frontMiddleColumnPane = new Pane(); //Pane for Front Middle Column Tip
+    Pane frontRightColumnPane = new Pane(); //Pane for Front Right Column Tip
+    Pane sideLeftColumnPane = new Pane(); //Pane for Side Left Column Tip
+    Pane sideMiddleColumnPane = new Pane(); //Pane for Side Middle Column Tip
+    Pane sideRightColumnPane = new Pane(); //Pane for Side Right Column Tip
     Scene scene = new Scene(root, 1400, 900, true); //Scene created, contains root, has size 1400 X 900, and correctly shows overlap of objects
     private Rotate rotateX = new Rotate(0, Rotate.X_AXIS);
     private Rotate rotateY = new Rotate(0, Rotate.Y_AXIS);
@@ -55,6 +52,7 @@ public class Project481 extends Application
     boolean isCtrl = false;
     boolean lock = false;
     
+    int[] previousRotations = new int[9];
     int[] rotations = new int[9];
     //rotations in order are:
     //Row One
@@ -107,6 +105,32 @@ public class Project481 extends Application
                     }
         });
     }
+    
+    /*public MeshView[][] rotatePos90(MeshView[][] start)
+    {
+        MeshView[][] end = new MeshView[start.length][start.length];
+        for(int a = 0; a < start.length; a++)
+        {
+            for(int b = 0; b < start.length; b++)
+            {
+                end[a][b] = start[start.length - 1 - b][a];
+            }
+        }
+        return end;
+    }
+    
+    public static MeshView[][] rotateNeg90(MeshView[][] start)
+    {
+        MeshView[][] end = new MeshView[start.length][start.length];
+        for(int a = 0; a < start.length; a++)
+        {
+            for(int b = 0; b < start.length; b++)
+            {
+                end[a][b] = start[b][start.length - 1 - a];
+            }
+        }
+        return end;
+    }*/
 
     private void handleKeyEvents()
     {
@@ -137,6 +161,7 @@ public class Project481 extends Application
                     }
                     if ((!lock || rotations[rotationsLocation] % 90 != 0) && arrayLocation < 3)
                     {
+                        rotations[rotationsLocation] += 2 * modifier;
                         for (int a = 0; a < 3; a++)
                         {
                             for (int b = 0; b < 3; b++)
@@ -144,21 +169,17 @@ public class Project481 extends Application
                                 if (p == Rotate.X_AXIS)
                                 {
                                     meshView[a][b][arrayLocation].getTransforms().add(new Rotate(2 * modifier, 0, 0, 0, p));
-                                    meshView[a][b][arrayLocation].getTransforms().removeAll();
                                 }
-                                if (p == Rotate.Y_AXIS)
+                                else if (p == Rotate.Y_AXIS)
                                 {
                                     meshView[a][arrayLocation][b].getTransforms().add(new Rotate(2 * modifier, 0, 0, 0, p));
-                                    meshView[a][arrayLocation][b].getTransforms().removeAll();
                                 }
-                                if (p == Rotate.Z_AXIS)
+                                else if (p == Rotate.Z_AXIS)
                                 {
                                     meshView[arrayLocation][a][b].getTransforms().add(new Rotate(2 * modifier, 0, 0, 0, p));
-                                    meshView[arrayLocation][a][b].getTransforms().removeAll();
                                 }
                             }
                         }
-                        rotations[rotationsLocation] += 2 * modifier;
                     }
                     
                     if (rotations[0] % 90 == 0 && rotations[1] % 90 == 0 && rotations[2] % 90 == 0 && rotations[3] % 90 == 0 && rotations[4] % 90 == 0 && rotations[5] % 90 == 0 && rotations[6] % 90 == 0 && rotations[7] % 90 == 0 && rotations[8] % 90 == 0)
@@ -166,12 +187,18 @@ public class Project481 extends Application
                         lock = false;
                         toggle1.setText("Off");
                         toggle1.setFill(Color.GREEN);
-                        
                         for (int a = 0; a < 9; a++)
                         {
-                            if (rotations[a] % 90 == 0 && rotations[a] != 0) //Will always be -90 or 90
+                            if (rotations[a] == 360 || rotations[a] == -360)
                             {
-                                //Rotate Mesh view by +/- 90 degrees
+                                rotations[a] = 0;
+                            }
+                        }
+                        for (int a = 0; a < 9; a++)
+                        {
+                            if (rotations[a] != previousRotations[a])
+                            {
+                                previousRotations[a] = rotations[a];
                                 MeshView[][] temp = new MeshView[3][3];
                                 for (int c = 0; c < 3; c++)
                                 {
@@ -181,74 +208,67 @@ public class Project481 extends Application
                                         {
                                             temp[c][d] = meshView[c][d][arrayLocation];
                                         }
-                                        if (p == Rotate.Y_AXIS)
+                                        else if (p == Rotate.Y_AXIS)
                                         {
                                             temp[c][d] = meshView[c][arrayLocation][d];
                                         }
-                                        if (p == Rotate.Z_AXIS)
+                                        else if (p == Rotate.Z_AXIS)
                                         {
                                             temp[c][d] = meshView[arrayLocation][c][d];
                                         }
                                     }
                                 }
+                                ////////////////////////////////////////////////
                                 if (rotations[a] == 90)
-                                {
-                                    if (p == Rotate.X_AXIS)
-                                    {
-                                        for (int c = 0; c < 3; c++)
-                                        {
-                                            for (int d = 0; d < 3; d++)
-                                            {
-                                                meshView[c][d][arrayLocation] = temp[d][2 - c];
-                                            }
-                                        }
-                                    }
-                                    if (p == Rotate.Y_AXIS)
-                                    {
-                                        for (int c = 0; c < 3; c++)
-                                        {
-                                            for (int d = 0; d < 3; d++)
-                                            {
-                                                meshView[c][arrayLocation][d] = temp[d][2 - c];
-                                            }
-                                        }
-                                    }
-                                    if (p == Rotate.Z_AXIS)
-                                    {
-                                        for (int c = 0; c < 3; c++)
-                                        {
-                                            for (int d = 0; d < 3; d++)
-                                            {
-                                                meshView[arrayLocation][c][d] = temp[d][2 - c];
-                                            }
-                                        }
-                                    }
-                                }
-                                if (rotations[a] == -90)
                                 {
                                     for (int c = 0; c < 3; c++)
                                     {
-                                        for (int d = 2; d >= 0; d--)
+                                        for (int d = 0; d < 3; d++)
                                         {
                                             if (p == Rotate.X_AXIS)
                                             {
-                                                meshView[c][2 - d][arrayLocation] = temp[c][d];
-                                                //meshView[c][2-d][arrayLocation].getTransforms().clear();
+                                                meshView[d][c][arrayLocation] = temp[c][2 - d];
                                             }
-                                            if (p == Rotate.Y_AXIS)
+                                            else if (p == Rotate.Y_AXIS)
                                             {
-                                                meshView[c][arrayLocation][2 - d] = temp[c][d];
-                                                //meshView[c][arrayLocation][2-d].getTransforms().clear();
+                                                meshView[d][arrayLocation][c] = temp[c][2 - d];
                                             }
-                                            if (p == Rotate.Z_AXIS)
+                                            else if (p == Rotate.Z_AXIS)
                                             {
-                                                meshView[arrayLocation][c][2 - d] = temp[c][d];
-                                                //meshView[arrayLocation][c][2-d].getTransforms().clear();
+                                                meshView[arrayLocation][d][c] = temp[c][2 - d];
                                             }
                                         }
                                     }
                                 }
-                                rotations[a] = 0;
+                                if (rotations[a] == 180 || rotations[a] == -180)
+                                {
+                                    MeshView[][] temp2 = new MeshView[3][3];
+                                    for (int c = 0; c < 3; c++)
+                                    {
+                                        for (int d = 0; d < 3; d++)
+                                        {
+                                            temp2[c][d] = temp[2 - d][c]; //Flipped once 90 degrees and then again below
+                                        }
+                                    }
+                                    for(int c = 0; c < 3; c++)
+                                    {
+                                        for(int d = 0; d < 3; d++)
+                                        {
+                                            if (p == Rotate.X_AXIS)
+                                            {
+                                                meshView[c][2 - d][arrayLocation] = temp2[2 - d][c];
+                                            }
+                                            if (p == Rotate.Y_AXIS)
+                                            {
+                                                meshView[c][arrayLocation][2 - d] = temp2[2 - d][c];
+                                            }
+                                            if (p == Rotate.Z_AXIS)
+                                            {
+                                                meshView[arrayLocation][c][2 - d] = temp[2 - d][c];
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -268,21 +288,45 @@ public class Project481 extends Application
     @Override
     public void start(Stage primaryStage)
     {
-        light.setColor(Color.WHITE);
-        light2.setColor(Color.WHITE);
-        light2.setTranslateX(-450);
-        light2.setTranslateY(-450);
+        //light2.setColor(Color.WHITE);
+        //light2.relocate(-450, -450);
+        //light.setTranslateZ(-400);
         root.getChildren().add(light);
-        root.getChildren().add(light2);
+        //root.getChildren().add(light2);
+        
+        topRowPane.relocate(660, -295);
+        middleRowPane.relocate(660, -240);
+        bottomRowPane.relocate(660, -185);
+        frontLeftColumnPane.relocate(660, -130);
+        frontMiddleColumnPane.relocate(660, -75);
+        frontRightColumnPane.relocate(660, -20);
+        sideLeftColumnPane.relocate(660, 35);
+        sideMiddleColumnPane.relocate(660, 90);
+        sideRightColumnPane.relocate(660, 145);
+        //light3.setColor(Color.WHITE);
+        //topRowPane.getChildren().add(light3);
         
         toggle1.setFill(Color.GREEN);
         //toggle2.setFill(Color.RED);
         Camera camera = new PerspectiveCamera(false); //Camera created to rotate around Rubik's Cube
-        cubePane.getTransforms().addAll(rotateZ, rotateY, rotateX); //
+        cubePane.getTransforms().addAll(rotateZ, rotateY, rotateX);
+        topRowPane.getTransforms().addAll(rotateZ, rotateY, rotateX);
+        middleRowPane.getTransforms().addAll(rotateZ, rotateY, rotateX);
+        bottomRowPane.getTransforms().addAll(rotateZ, rotateY, rotateX);
+        frontLeftColumnPane.getTransforms().addAll(rotateZ, rotateY, rotateX);
+        frontMiddleColumnPane.getTransforms().addAll(rotateZ, rotateY, rotateX);
+        frontRightColumnPane.getTransforms().addAll(rotateZ, rotateY, rotateX);
+        sideLeftColumnPane.getTransforms().addAll(rotateZ, rotateY, rotateX);
+        sideMiddleColumnPane.getTransforms().addAll(rotateZ, rotateY, rotateX);
+        sideRightColumnPane.getTransforms().addAll(rotateZ, rotateY, rotateX);
         scene.setFill(Color.GRAY); //Background of Scene changed to Gray
         scene.setCamera(camera); //Scene's Camera set
 
         camera.relocate(-450, -450); //Center of Focus for Camera changed to -700, -450
+        
+        PhongMaterial fuchsiaMaterial = new PhongMaterial();
+        fuchsiaMaterial.setDiffuseColor(Color.FUCHSIA);
+        fuchsiaMaterial.setSpecularColor(Color.DEEPPINK);
         //------------------------------------------------------------------------------------------------------------------------------------------------
         Text title = new Text("Rubik's Cube");
         title.relocate(500, -405);
@@ -302,8 +346,13 @@ public class Project481 extends Application
         directionsRow1.setFont(Font.font("Arial", 25));
         menuPane.getChildren().add(directionsRow1);
         
-        topRow.relocate(650, -310);
-        menuPane.getChildren().add(topRow);
+        Box outerCube1 = new Box(36,36,36);
+        topRowPane.getChildren().add(outerCube1);
+        
+        Box topRow = new Box(38,13,38);
+        topRow.setTranslateY(-13);
+        topRow.setMaterial(fuchsiaMaterial);
+        topRowPane.getChildren().add(topRow);
         
         Text directionsRow2 = new Text("Press A/S:");
         directionsRow2.relocate(500, -245);
@@ -311,75 +360,112 @@ public class Project481 extends Application
         directionsRow2.setFont(Font.font("Arial", 25));
         menuPane.getChildren().add(directionsRow2);
         
-        middleRow.relocate(650, -260);
-        menuPane.getChildren().add(middleRow);
+        Box outerCube2 = new Box(35,35,35);
+        middleRowPane.getChildren().add(outerCube2);
+        
+        Box middleRow = new Box(38,12,38);
+        middleRow.setMaterial(fuchsiaMaterial);
+        middleRowPane.getChildren().add(middleRow);
         
         Text directionsRow3 = new Text("Press Z/X:");
-        directionsRow3.relocate(500, -195);
+        directionsRow3.relocate(500, -188);
         directionsRow3.setFill(Color.WHITE);
         directionsRow3.setFont(Font.font("Arial", 25));
         menuPane.getChildren().add(directionsRow3);
         
-        bottomRow.relocate(650, -210);
-        menuPane.getChildren().add(bottomRow);
+        Box outerCube3 = new Box(35,35,35);
+        bottomRowPane.getChildren().add(outerCube3);
+        
+        Box bottomRow = new Box(38,13,38);
+        bottomRow.setMaterial(fuchsiaMaterial);
+        bottomRow.setTranslateY(14);
+        bottomRowPane.getChildren().add(bottomRow);
         
         //----------------------------------------------------------------------
         
         Text directionsRow4 = new Text("Press E/D:");
-        directionsRow4.relocate(500, -145);
+        directionsRow4.relocate(500, -136);
         directionsRow4.setFill(Color.WHITE);
         directionsRow4.setFont(Font.font("Arial", 25));
         menuPane.getChildren().add(directionsRow4);
         
-        leftFrontColumn.relocate(650, -160);
-        menuPane.getChildren().add(leftFrontColumn);
+        Box outerCube4 = new Box(35,35,35);
+        frontLeftColumnPane.getChildren().add(outerCube4);
+        
+        Box frontLeftColumn = new Box(13,38,38);
+        frontLeftColumn.setMaterial(fuchsiaMaterial);
+        frontLeftColumn.setTranslateX(-14);
+        frontLeftColumnPane.getChildren().add(frontLeftColumn);
         
         Text directionsRow5 = new Text("Press R/F:");
-        directionsRow5.relocate(500, -95);
+        directionsRow5.relocate(500, -82);
         directionsRow5.setFill(Color.WHITE);
         directionsRow5.setFont(Font.font("Arial", 25));
         menuPane.getChildren().add(directionsRow5);
         
-        middleFrontColumn.relocate(650, -110);
-        menuPane.getChildren().add(middleFrontColumn);
+        Box outerCube5 = new Box(35,35,35);
+        frontMiddleColumnPane.getChildren().add(outerCube5);
+        
+        Box frontMiddleColumn = new Box(12,38,38);
+        frontMiddleColumn.setMaterial(fuchsiaMaterial);
+        frontMiddleColumnPane.getChildren().add(frontMiddleColumn);
         
         Text directionsRow6 = new Text("Press T/G:");
-        directionsRow6.relocate(500, -45);
+        directionsRow6.relocate(500, -27);
         directionsRow6.setFill(Color.WHITE);
         directionsRow6.setFont(Font.font("Arial", 25));
         menuPane.getChildren().add(directionsRow6);
         
-        rightFrontColumn.relocate(650, -60);
-        menuPane.getChildren().add(rightFrontColumn);
+        Box outerCube6 = new Box(35,35,35);
+        frontRightColumnPane.getChildren().add(outerCube6);
+        
+        Box frontRightColumn = new Box(13,38,38);
+        frontRightColumn.setMaterial(fuchsiaMaterial);
+        frontRightColumn.setTranslateX(14);
+        frontRightColumnPane.getChildren().add(frontRightColumn);
         
         //----------------------------------------------------------------------
         
         Text directionsRow7 = new Text("Press Y/H:");
-        directionsRow7.relocate(500, 5);
+        directionsRow7.relocate(500, 29);
         directionsRow7.setFill(Color.WHITE);
         directionsRow7.setFont(Font.font("Arial", 25));
         menuPane.getChildren().add(directionsRow7);
         
-        leftSideColumn.relocate(650, -10);
-        menuPane.getChildren().add(leftSideColumn);
+        Box outerCube7 = new Box(35,35,35);
+        sideLeftColumnPane.getChildren().add(outerCube7);
+        
+        Box sideLeftColumn = new Box(38,38,13);
+        sideLeftColumn.setMaterial(fuchsiaMaterial);
+        sideLeftColumn.setTranslateZ(-14);
+        sideLeftColumnPane.getChildren().add(sideLeftColumn);
         
         Text directionsRow8 = new Text("Press U/J:");
-        directionsRow8.relocate(500, 55);
+        directionsRow8.relocate(500, 86);
         directionsRow8.setFill(Color.WHITE);
         directionsRow8.setFont(Font.font("Arial", 25));
         menuPane.getChildren().add(directionsRow8);
         
-        middleSideColumn.relocate(650, 40);
-        menuPane.getChildren().add(middleSideColumn);
+        Box outerCube8 = new Box(35,35,35);
+        sideMiddleColumnPane.getChildren().add(outerCube8);
+        
+        Box sideMiddleColumn = new Box(38,38,13);
+        sideMiddleColumn.setMaterial(fuchsiaMaterial);
+        sideMiddleColumnPane.getChildren().add(sideMiddleColumn);
         
         Text directionsRow9 = new Text("Press I/K:"); //Key words: Perpendicular/Facing & right - left
-        directionsRow9.relocate(500, 105);
+        directionsRow9.relocate(500, 138);
         directionsRow9.setFill(Color.WHITE);
         directionsRow9.setFont(Font.font("Arial", 25));
         menuPane.getChildren().add(directionsRow9);
         
-        rightSideColumn.relocate(650, 90);
-        menuPane.getChildren().add(rightSideColumn);
+        Box outerCube9 = new Box(35,35,35);
+        sideRightColumnPane.getChildren().add(outerCube9);
+        
+        Box sideRightColumn = new Box(38,38,13);
+        sideRightColumn.setMaterial(fuchsiaMaterial);
+        sideRightColumn.setTranslateZ(14);
+        sideRightColumnPane.getChildren().add(sideRightColumn);
         //----------------------------------------------------------------------
         
         int xAdj = 0;
@@ -471,7 +557,7 @@ public class Project481 extends Application
 
         handleMouseEvents();
         handleKeyEvents();
-        root.getChildren().addAll(menuPane, cubePane); //Add subpanes menuPane and cubePane
+        root.getChildren().addAll(menuPane, cubePane, topRowPane, middleRowPane, bottomRowPane, frontLeftColumnPane, frontMiddleColumnPane, frontRightColumnPane, sideLeftColumnPane, sideMiddleColumnPane, sideRightColumnPane);
         primaryStage.setTitle("Project B481 - Rubik's Cube"); //Set Title of window
         primaryStage.setScene(scene); //Set scene of window to scene
         primaryStage.show(); //Show window
