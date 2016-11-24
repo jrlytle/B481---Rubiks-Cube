@@ -1,5 +1,7 @@
 package project481;
 
+import java.util.ArrayList;
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Point3D;
 import javafx.scene.Camera;
@@ -26,12 +28,11 @@ public class Project481 extends Application
 {
     int rotate = 0;
     PointLight light = new PointLight();
-    //PointLight light2 = new PointLight();
-    //PointLight light3 = new PointLight();
     
     Pane root = new Pane(); //Root created to hold all objects/Panes
     Pane menuPane = new Pane(); //Menu Pane created to hold directions on how to play game
     Pane cubePane = new Pane(); //Cube Pane created to hold Rubik's cube
+    //For Tips:
     Pane topRowPane = new Pane(); //Pane for Top Row Tip
     Pane middleRowPane = new Pane(); //Pane for Middle Row Tip
     Pane bottomRowPane = new Pane(); //Pane for Bottom Row Tip
@@ -41,6 +42,40 @@ public class Project481 extends Application
     Pane sideLeftColumnPane = new Pane(); //Pane for Side Left Column Tip
     Pane sideMiddleColumnPane = new Pane(); //Pane for Side Middle Column Tip
     Pane sideRightColumnPane = new Pane(); //Pane for Side Right Column Tip
+    //For individual Cubes:
+    //Facing Face (ha, ha)
+    Pane cubeOne = new Pane(); //Top Left
+    Pane cubeTwo = new Pane(); //Top Middle
+    Pane cubeThree = new Pane(); //Top Right
+    Pane cubeFour = new Pane(); //Middle Left
+    Pane cubeFive = new Pane(); //Middle Middle
+    Pane cubeSix = new Pane(); //Middle Right
+    Pane cubeSeven = new Pane(); //Bottom Left
+    Pane cubeEight = new Pane(); //Bottom Middle
+    Pane cubeNine = new Pane(); //Bottom Right
+    //Middle Face
+    Pane cubeTen = new Pane(); //Top Left
+    Pane cubeEleven = new Pane(); //Top Middle
+    Pane cubeTwelve = new Pane(); //Top Right
+    Pane cubeThirteen = new Pane(); //Middle Left
+    Pane cubeFourteen = new Pane(); //Middle Middle (Redundant?)
+    Pane cubeFifteen = new Pane(); //Middle Right
+    Pane cubeSixteen = new Pane(); //Bottom Left
+    Pane cubeSeventeen = new Pane(); //Bottom Middle
+    Pane cubeEighteen = new Pane(); //Bottom Right
+    //Back Face
+    Pane cubeNineteen = new Pane(); //Top Left
+    Pane cubeTwenty = new Pane(); //Top Middle
+    Pane cubeTwentyOne = new Pane(); //Top Right
+    Pane cubeTwentyTwo = new Pane(); //Middle Left
+    Pane cubeTwentyThree = new Pane(); //Middle Middle
+    Pane cubeTwentyFour = new Pane(); //Middle Right
+    Pane cubeTwentyFive = new Pane(); //Bottom Left
+    Pane cubeTwentySix = new Pane(); //Bottom Middle
+    Pane cubeTwentySeven = new Pane(); //Bottom Right
+    ////////////////////////////////////////////////////////////////////////////
+    ArrayList<Rotate>[] cubeRotations = new ArrayList[27];
+    ////////////////////////////////////////////////////////////////////////////
     Scene scene = new Scene(root, 1400, 900, true); //Scene created, contains root, has size 1400 X 900, and correctly shows overlap of objects
     private Rotate rotateX = new Rotate(0, Rotate.X_AXIS);
     private Rotate rotateY = new Rotate(0, Rotate.Y_AXIS);
@@ -72,6 +107,27 @@ public class Project481 extends Application
     PhongMaterial cubeFace = new PhongMaterial();
     Image rubik = new Image(getClass().getResource("rubik.png").toExternalForm());
     MeshView[][][] meshView = new MeshView[3][3][3];
+    
+    int[][] temp = new int[3][3];
+    
+    int[][][] cubeLocations = 
+    {
+        {
+            {1,2,3},
+            {4,5,6},
+            {7,8,9}
+        },
+        {
+            {10,11,12},
+            {13,14,15},
+            {16,17,18}
+        },
+        {
+            {19,20,21},
+            {22,23,24},
+            {25,26,27}
+        }
+    };
     
     int arrayLocation = 0;
     int rotationsLocation = 0;
@@ -105,32 +161,6 @@ public class Project481 extends Application
                     }
         });
     }
-    
-    /*public MeshView[][] rotatePos90(MeshView[][] start)
-    {
-        MeshView[][] end = new MeshView[start.length][start.length];
-        for(int a = 0; a < start.length; a++)
-        {
-            for(int b = 0; b < start.length; b++)
-            {
-                end[a][b] = start[start.length - 1 - b][a];
-            }
-        }
-        return end;
-    }
-    
-    public static MeshView[][] rotateNeg90(MeshView[][] start)
-    {
-        MeshView[][] end = new MeshView[start.length][start.length];
-        for(int a = 0; a < start.length; a++)
-        {
-            for(int b = 0; b < start.length; b++)
-            {
-                end[a][b] = start[b][start.length - 1 - a];
-            }
-        }
-        return end;
-    }*/
 
     private void handleKeyEvents()
     {
@@ -139,138 +169,410 @@ public class Project481 extends Application
                 {
                     switch(k.getCode().toString()) //Add mod for rotation -1 or 1
                     {
-                        case "Q": arrayLocation = 0; rotationsLocation = 0; modifier = 1; p = Rotate.Y_AXIS; break;
-                        case "W": arrayLocation = 0; rotationsLocation = 0; modifier = -1; p = Rotate.Y_AXIS; break;
-                        case "A": arrayLocation = 1; rotationsLocation = 1; modifier = 1; p = Rotate.Y_AXIS; break;
-                        case "S": arrayLocation = 1; rotationsLocation = 1; modifier = -1; p = Rotate.Y_AXIS; break;
-                        case "Z": arrayLocation = 2; rotationsLocation = 2; modifier = 1; p = Rotate.Y_AXIS; break;
-                        case "X": arrayLocation = 2; rotationsLocation = 2; modifier = -1; p = Rotate.Y_AXIS; break;
-                        case "E": arrayLocation = 0; rotationsLocation = 3; modifier = 1; p = Rotate.X_AXIS; break;
-                        case "D": arrayLocation = 0; rotationsLocation = 3; modifier = -1; p = Rotate.X_AXIS; break;
-                        case "R": arrayLocation = 1; rotationsLocation = 4; modifier = 1; p = Rotate.X_AXIS; break;
-                        case "F": arrayLocation = 1; rotationsLocation = 4; modifier = -1; p = Rotate.X_AXIS; break;
-                        case "T": arrayLocation = 2; rotationsLocation = 5; modifier = 1; p = Rotate.X_AXIS; break;
-                        case "G": arrayLocation = 2; rotationsLocation = 5; modifier = -1; p = Rotate.X_AXIS; break;
-                        case "Y": arrayLocation = 0; rotationsLocation = 6; modifier = 1; p = Rotate.Z_AXIS; break;
-                        case "H": arrayLocation = 0; rotationsLocation = 6; modifier = -1; p = Rotate.Z_AXIS; break;
-                        case "U": arrayLocation = 1; rotationsLocation = 7; modifier = 1; p = Rotate.Z_AXIS; break;
-                        case "J": arrayLocation = 1; rotationsLocation = 7; modifier = -1; p = Rotate.Z_AXIS; break;
-                        case "I": arrayLocation = 2; rotationsLocation = 8; modifier = 1; p = Rotate.Z_AXIS; break;
-                        case "K": arrayLocation = 2; rotationsLocation = 8; modifier = -1; p = Rotate.Z_AXIS; break;
-                        default: arrayLocation = 3;
-                    }
-                    if ((!lock || rotations[rotationsLocation] % 90 != 0) && arrayLocation < 3)
-                    {
-                        rotations[rotationsLocation] += 2 * modifier;
-                        for (int a = 0; a < 3; a++)
+                        case "Q":
                         {
-                            for (int b = 0; b < 3; b++)
+                            for (int a = 0; a < 3; a++)
                             {
-                                if (p == Rotate.X_AXIS)
+                                for (int b = 0; b < 3; b++)
                                 {
-                                    meshView[a][b][arrayLocation].getTransforms().add(new Rotate(2 * modifier, 0, 0, 0, p));
+                                    cubeRotations[cubeLocations[a][0][b]-1].add(new Rotate(90, 0, 0, 0, Rotate.Y_AXIS));
+                                    temp[a][b] = cubeLocations[a][0][b];
                                 }
-                                else if (p == Rotate.Y_AXIS)
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
                                 {
-                                    meshView[a][arrayLocation][b].getTransforms().add(new Rotate(2 * modifier, 0, 0, 0, p));
+                                    cubeLocations[a][0][b] = temp[b][2-a];
                                 }
-                                else if (p == Rotate.Z_AXIS)
+                            }
+                        }    
+                        break;
+                        case "W": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
                                 {
-                                    meshView[arrayLocation][a][b].getTransforms().add(new Rotate(2 * modifier, 0, 0, 0, p));
+                                    cubeRotations[cubeLocations[a][0][b]-1].add(new Rotate(-90, 0, 0, 0, Rotate.Y_AXIS));
+                                    temp[a][b] = cubeLocations[a][0][b];
+                                }
+                            }
+                            for(int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[a][0][b] = temp[2-b][a];
                                 }
                             }
                         }
+                        break;
+                        case "A": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[a][1][b]-1].add(new Rotate(90, 0, 0, 0, Rotate.Y_AXIS));
+                                    temp[a][b] = cubeLocations[a][1][b];
+                                }
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[a][1][b] = temp[b][2 - a];
+                                }
+                            }
+                        }
+                        break;
+                        case "S": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[a][1][b]-1].add(new Rotate(-90, 0, 0, 0, Rotate.Y_AXIS));
+                                    temp[a][b] = cubeLocations[a][1][b];
+                                }
+                            }
+                            for(int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[a][1][b] = temp[2 - b][a];
+                                }
+                            }
+                        }
+                        break;
+                        case "Z": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[a][2][b]-1].add(new Rotate(90, 0, 0, 0, Rotate.Y_AXIS));
+                                    temp[a][b] = cubeLocations[a][2][b];
+                                }
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[a][2][b] = temp[b][2 - a];
+                                }
+                            }
+                        }
+                        break;
+                        case "X": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[a][2][b]-1].add(new Rotate(-90, 0, 0, 0, Rotate.Y_AXIS));
+                                    temp[a][b] = cubeLocations[a][2][b];
+                                }
+                            }
+                            for(int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[a][2][b] = temp[2 - b][a];
+                                }
+                            }
+                        }
+                        break;
+                        case "E": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[a][b][0]-1].add(new Rotate(-90, 0, 0, 0, Rotate.X_AXIS));
+                                    temp[a][b] = cubeLocations[a][b][0];
+                                }
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[a][b][0] = temp[b][2 - a];
+                                }
+                            }
+                        }
+                        break;
+                        case "D": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[a][b][0]-1].add(new Rotate(90, 0, 0, 0, Rotate.X_AXIS));
+                                    temp[a][b] = cubeLocations[a][b][0];
+                                }
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[a][b][0] = temp[2-b][a];
+                                }
+                            }
+                        }
+                        break;
+                        case "R": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[a][b][1]-1].add(new Rotate(-90, 0, 0, 0, Rotate.X_AXIS));
+                                    temp[a][b] = cubeLocations[a][b][1];
+                                }
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[a][b][1] = temp[b][2 - a];
+                                }
+                            }
+                        }
+                        break;
+                        case "F": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[a][b][1]-1].add(new Rotate(90, 0, 0, 0, Rotate.X_AXIS));
+                                    temp[a][b] = cubeLocations[a][b][1];
+                                }
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[a][b][1] = temp[2-b][a];
+                                }
+                            }
+                        }
+                        break;
+                        case "T": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[a][b][2]-1].add(new Rotate(-90, 0, 0, 0, Rotate.X_AXIS));
+                                    temp[a][b] = cubeLocations[a][b][2];
+                                }
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[a][b][2] = temp[b][2 - a];
+                                }
+                            }
+                        }
+                        break;
+                        case "G":
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[a][b][2]-1].add(new Rotate(90, 0, 0, 0, Rotate.X_AXIS));
+                                    temp[a][b] = cubeLocations[a][b][2];
+                                }
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[a][b][2] = temp[2-b][a];
+                                }
+                            }
+                        }
+                        break;
+                        case "Y": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[0][a][b]-1].add(new Rotate(90, 0, 0, 0, Rotate.Z_AXIS));
+                                    temp[a][b] = cubeLocations[0][a][b];
+                                }
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[0][a][b] = temp[2-b][a];
+                                }
+                            }
+                        }
+                        break;
+                        case "H": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[0][a][b]-1].add(new Rotate(-90, 0, 0, 0, Rotate.Z_AXIS));
+                                    temp[a][b] = cubeLocations[0][a][b];
+                                }
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[0][a][b] = temp[b][2-a];
+                                }
+                            }
+                        }
+                        break;
+                        case "U": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[1][a][b]-1].add(new Rotate(90, 0, 0, 0, Rotate.Z_AXIS));
+                                    temp[a][b] = cubeLocations[1][a][b];
+                                }
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[1][a][b] = temp[2-b][a];
+                                }
+                            }
+                        }
+                        break;
+                        case "J": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[1][a][b]-1].add(new Rotate(-90, 0, 0, 0, Rotate.Z_AXIS));
+                                    temp[a][b] = cubeLocations[1][a][b];
+                                }
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[1][a][b] = temp[b][2-a];
+                                }
+                            }
+                        }
+                        break;
+                        case "I": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[2][a][b]-1].add(new Rotate(90, 0, 0, 0, Rotate.Z_AXIS));
+                                    temp[a][b] = cubeLocations[2][a][b];
+                                }
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[2][a][b] = temp[2-b][a];
+                                }
+                            }
+                        }
+                        break;
+                        case "K": 
+                        {
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeRotations[cubeLocations[2][a][b]-1].add(new Rotate(-90, 0, 0, 0, Rotate.Z_AXIS));
+                                    temp[a][b] = cubeLocations[2][a][b];
+                                }
+                            }
+                            for (int a = 0; a < 3; a++)
+                            {
+                                for (int b = 0; b < 3; b++)
+                                {
+                                    cubeLocations[2][a][b] = temp[b][2-a];
+                                }
+                            }
+                        }
+                        break;
                     }
                     
+                    cubeOne.getTransforms().clear();
+                    cubeOne.getTransforms().addAll(cubeRotations[0]);
+                    cubeTwo.getTransforms().clear();
+                    cubeTwo.getTransforms().addAll(cubeRotations[1]);
+                    cubeThree.getTransforms().clear();
+                    cubeThree.getTransforms().addAll(cubeRotations[2]);
+                    cubeFour.getTransforms().clear();
+                    cubeFour.getTransforms().addAll(cubeRotations[3]);
+                    cubeFive.getTransforms().clear();
+                    cubeFive.getTransforms().addAll(cubeRotations[4]);
+                    cubeSix.getTransforms().clear();
+                    cubeSix.getTransforms().addAll(cubeRotations[5]);
+                    cubeSeven.getTransforms().clear();
+                    cubeSeven.getTransforms().addAll(cubeRotations[6]);
+                    cubeEight.getTransforms().clear();
+                    cubeEight.getTransforms().addAll(cubeRotations[7]);
+                    cubeNine.getTransforms().clear();
+                    cubeNine.getTransforms().addAll(cubeRotations[8]);
+                    cubeTen.getTransforms().clear();
+                    cubeTen.getTransforms().addAll(cubeRotations[9]);
+                    cubeEleven.getTransforms().clear();
+                    cubeEleven.getTransforms().addAll(cubeRotations[10]);
+                    cubeTwelve.getTransforms().clear();
+                    cubeTwelve.getTransforms().addAll(cubeRotations[11]);
+                    cubeThirteen.getTransforms().clear();
+                    cubeThirteen.getTransforms().addAll(cubeRotations[12]);
+                    cubeFourteen.getTransforms().clear();
+                    cubeFourteen.getTransforms().addAll(cubeRotations[13]);
+                    cubeFifteen.getTransforms().clear();
+                    cubeFifteen.getTransforms().addAll(cubeRotations[14]);
+                    cubeSixteen.getTransforms().clear();
+                    cubeSixteen.getTransforms().addAll(cubeRotations[15]);
+                    cubeSeventeen.getTransforms().clear();
+                    cubeSeventeen.getTransforms().addAll(cubeRotations[16]);
+                    cubeEighteen.getTransforms().clear();
+                    cubeEighteen.getTransforms().addAll(cubeRotations[17]);
+                    cubeNineteen.getTransforms().clear();
+                    cubeNineteen.getTransforms().addAll(cubeRotations[18]);
+                    cubeTwenty.getTransforms().clear();
+                    cubeTwenty.getTransforms().addAll(cubeRotations[19]);
+                    cubeTwentyOne.getTransforms().clear();
+                    cubeTwentyOne.getTransforms().addAll(cubeRotations[20]);
+                    cubeTwentyTwo.getTransforms().clear();
+                    cubeTwentyTwo.getTransforms().addAll(cubeRotations[21]);
+                    cubeTwentyThree.getTransforms().clear();
+                    cubeTwentyThree.getTransforms().addAll(cubeRotations[22]);
+                    cubeTwentyFour.getTransforms().clear();
+                    cubeTwentyFour.getTransforms().addAll(cubeRotations[23]);
+                    cubeTwentyFive.getTransforms().clear();
+                    cubeTwentyFive.getTransforms().addAll(cubeRotations[24]);
+                    cubeTwentySix.getTransforms().clear();
+                    cubeTwentySix.getTransforms().addAll(cubeRotations[25]);
+                    cubeTwentySeven.getTransforms().clear();
+                    cubeTwentySeven.getTransforms().addAll(cubeRotations[26]);
+                                        
                     if (rotations[0] % 90 == 0 && rotations[1] % 90 == 0 && rotations[2] % 90 == 0 && rotations[3] % 90 == 0 && rotations[4] % 90 == 0 && rotations[5] % 90 == 0 && rotations[6] % 90 == 0 && rotations[7] % 90 == 0 && rotations[8] % 90 == 0)
                     {
                         lock = false;
                         toggle1.setText("Off");
                         toggle1.setFill(Color.GREEN);
-                        for (int a = 0; a < 9; a++)
-                        {
-                            if (rotations[a] == 360 || rotations[a] == -360)
-                            {
-                                rotations[a] = 0;
-                            }
-                        }
-                        for (int a = 0; a < 9; a++)
-                        {
-                            if (rotations[a] != previousRotations[a])
-                            {
-                                previousRotations[a] = rotations[a];
-                                MeshView[][] temp = new MeshView[3][3];
-                                for (int c = 0; c < 3; c++)
-                                {
-                                    for (int d = 0; d < 3; d++)
-                                    {
-                                        if (p == Rotate.X_AXIS)
-                                        {
-                                            temp[c][d] = meshView[c][d][arrayLocation];
-                                        }
-                                        else if (p == Rotate.Y_AXIS)
-                                        {
-                                            temp[c][d] = meshView[c][arrayLocation][d];
-                                        }
-                                        else if (p == Rotate.Z_AXIS)
-                                        {
-                                            temp[c][d] = meshView[arrayLocation][c][d];
-                                        }
-                                    }
-                                }
-                                ////////////////////////////////////////////////
-                                if (rotations[a] == 90)
-                                {
-                                    for (int c = 0; c < 3; c++)
-                                    {
-                                        for (int d = 0; d < 3; d++)
-                                        {
-                                            if (p == Rotate.X_AXIS)
-                                            {
-                                                meshView[d][c][arrayLocation] = temp[c][2 - d];
-                                            }
-                                            else if (p == Rotate.Y_AXIS)
-                                            {
-                                                meshView[d][arrayLocation][c] = temp[c][2 - d];
-                                            }
-                                            else if (p == Rotate.Z_AXIS)
-                                            {
-                                                meshView[arrayLocation][d][c] = temp[c][2 - d];
-                                            }
-                                        }
-                                    }
-                                }
-                                if (rotations[a] == 180 || rotations[a] == -180)
-                                {
-                                    MeshView[][] temp2 = new MeshView[3][3];
-                                    for (int c = 0; c < 3; c++)
-                                    {
-                                        for (int d = 0; d < 3; d++)
-                                        {
-                                            temp2[c][d] = temp[2 - d][c]; //Flipped once 90 degrees and then again below
-                                        }
-                                    }
-                                    for(int c = 0; c < 3; c++)
-                                    {
-                                        for(int d = 0; d < 3; d++)
-                                        {
-                                            if (p == Rotate.X_AXIS)
-                                            {
-                                                meshView[c][2 - d][arrayLocation] = temp2[2 - d][c];
-                                            }
-                                            if (p == Rotate.Y_AXIS)
-                                            {
-                                                meshView[c][arrayLocation][2 - d] = temp2[2 - d][c];
-                                            }
-                                            if (p == Rotate.Z_AXIS)
-                                            {
-                                                meshView[arrayLocation][c][2 - d] = temp[2 - d][c];
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
                     else
                     {
@@ -278,21 +580,30 @@ public class Project481 extends Application
                         toggle1.setText("On");
                         toggle1.setFill(Color.RED);
                     }
-                    if(k.getCode() == KeyCode.ENTER)
-                    {
-                        
-                    }
         });
     }
 
     @Override
     public void start(Stage primaryStage)
-    {
-        //light2.setColor(Color.WHITE);
-        //light2.relocate(-450, -450);
-        //light.setTranslateZ(-400);
+    {        
+        for (int a = 0; a < 3; a++)
+        {
+            for (int b = 0; b < 3; b++)
+            {
+                for (int c = 0; c < 3; c++)
+                {
+                    System.out.print(cubeLocations[a][b][c] + " ");
+                }
+                System.out.println();
+            }
+            System.out.println();
+        }
+        System.out.println();
+        for(int i = 0; i < cubeRotations.length; i++)
+        {
+            cubeRotations[i] = new ArrayList();
+        }
         root.getChildren().add(light);
-        //root.getChildren().add(light2);
         
         topRowPane.relocate(660, -295);
         middleRowPane.relocate(660, -240);
@@ -303,11 +614,8 @@ public class Project481 extends Application
         sideLeftColumnPane.relocate(660, 35);
         sideMiddleColumnPane.relocate(660, 90);
         sideRightColumnPane.relocate(660, 145);
-        //light3.setColor(Color.WHITE);
-        //topRowPane.getChildren().add(light3);
         
         toggle1.setFill(Color.GREEN);
-        //toggle2.setFill(Color.RED);
         Camera camera = new PerspectiveCamera(false); //Camera created to rotate around Rubik's Cube
         cubePane.getTransforms().addAll(rotateZ, rotateY, rotateX);
         topRowPane.getTransforms().addAll(rotateZ, rotateY, rotateX);
@@ -467,7 +775,6 @@ public class Project481 extends Application
         sideRightColumn.setTranslateZ(14);
         sideRightColumnPane.getChildren().add(sideRightColumn);
         //----------------------------------------------------------------------
-        
         int xAdj = 0;
         int yAdj = 0;
         int zAdj = 0;
@@ -527,22 +834,204 @@ public class Project481 extends Application
             yAdj = 0;
             zAdj += 160;
         }
-        
-        for(int a = 0; a < 3; a++)
-        {
-            for(int b = 0; b < 3; b++)
-            {
-                for(int c = 0; c < 3; c++)
-                {
-                    meshView[a][b][c] = new MeshView(m[a][b][c]);
-                    meshView[a][b][c].setCullFace(CullFace.FRONT);
-                    meshView[a][b][c].setDrawMode(DrawMode.FILL);
-                    meshView[a][b][c].setMaterial(cubeFace);
-                    cubePane.getChildren().add(meshView[a][b][c]);
-                }
-            }
-        }
         cubeFace.setDiffuseMap(rubik);
+        
+        /*Text test = new Text("1");
+        test.setFont(Font.font("Arial", 100));
+        test.setFill(Color.BLACK);
+        test.setTranslateX(-235);
+        test.setTranslateY(-235);
+        test.setTranslateZ(-235);
+        cubeOne.getChildren().add(test);*/
+        
+        MeshView cube1 = new MeshView(m[0][0][0]);
+        cube1.setCullFace(CullFace.FRONT);
+        cube1.setDrawMode(DrawMode.FILL);
+        cube1.setMaterial(cubeFace);
+        cubeOne.getChildren().add(cube1);
+        cubePane.getChildren().add(cubeOne);
+        
+        MeshView cube2 = new MeshView(m[0][0][1]);
+        cube2.setCullFace(CullFace.FRONT);
+        cube2.setDrawMode(DrawMode.FILL);
+        cube2.setMaterial(cubeFace);
+        cubeTwo.getChildren().add(cube2);
+        cubePane.getChildren().add(cubeTwo);
+        
+        MeshView cube3 = new MeshView(m[0][0][2]);
+        cube3.setCullFace(CullFace.FRONT);
+        cube3.setDrawMode(DrawMode.FILL);
+        cube3.setMaterial(cubeFace);
+        cubeThree.getChildren().add(cube3);
+        cubePane.getChildren().add(cubeThree);
+        
+        MeshView cube4 = new MeshView(m[0][1][0]);
+        cube4.setCullFace(CullFace.FRONT);
+        cube4.setDrawMode(DrawMode.FILL);
+        cube4.setMaterial(cubeFace);
+        cubeFour.getChildren().add(cube4);
+        cubePane.getChildren().add(cubeFour);
+        
+        MeshView cube5 = new MeshView(m[0][1][1]);
+        cube5.setCullFace(CullFace.FRONT);
+        cube5.setDrawMode(DrawMode.FILL);
+        cube5.setMaterial(cubeFace);
+        cubeFive.getChildren().add(cube5);
+        cubePane.getChildren().add(cubeFive);
+        
+        MeshView cube6 = new MeshView(m[0][1][2]);
+        cube6.setCullFace(CullFace.FRONT);
+        cube6.setDrawMode(DrawMode.FILL);
+        cube6.setMaterial(cubeFace);
+        cubeSix.getChildren().add(cube6);
+        cubePane.getChildren().add(cubeSix);
+        
+        MeshView cube7 = new MeshView(m[0][2][0]);
+        cube7.setCullFace(CullFace.FRONT);
+        cube7.setDrawMode(DrawMode.FILL);
+        cube7.setMaterial(cubeFace);
+        cubeSeven.getChildren().add(cube7);
+        cubePane.getChildren().add(cubeSeven);
+        
+        MeshView cube8 = new MeshView(m[0][2][1]);
+        cube8.setCullFace(CullFace.FRONT);
+        cube8.setDrawMode(DrawMode.FILL);
+        cube8.setMaterial(cubeFace);
+        cubeEight.getChildren().add(cube8);
+        cubePane.getChildren().add(cubeEight);
+        
+        MeshView cube9 = new MeshView(m[0][2][2]);
+        cube9.setCullFace(CullFace.FRONT);
+        cube9.setDrawMode(DrawMode.FILL);
+        cube9.setMaterial(cubeFace);
+        cubeNine.getChildren().add(cube9);
+        cubePane.getChildren().add(cubeNine);
+        
+        MeshView cube10 = new MeshView(m[1][0][0]);
+        cube10.setCullFace(CullFace.FRONT);
+        cube10.setDrawMode(DrawMode.FILL);
+        cube10.setMaterial(cubeFace);
+        cubeTen.getChildren().add(cube10);
+        cubePane.getChildren().add(cubeTen);
+        
+        MeshView cube11 = new MeshView(m[1][0][1]);
+        cube11.setCullFace(CullFace.FRONT);
+        cube11.setDrawMode(DrawMode.FILL);
+        cube11.setMaterial(cubeFace);
+        cubeEleven.getChildren().add(cube11);
+        cubePane.getChildren().add(cubeEleven);
+        
+        MeshView cube12 = new MeshView(m[1][0][2]);
+        cube12.setCullFace(CullFace.FRONT);
+        cube12.setDrawMode(DrawMode.FILL);
+        cube12.setMaterial(cubeFace);
+        cubeTwelve.getChildren().add(cube12);
+        cubePane.getChildren().add(cubeTwelve);
+        
+        MeshView cube13 = new MeshView(m[1][1][0]);
+        cube13.setCullFace(CullFace.FRONT);
+        cube13.setDrawMode(DrawMode.FILL);
+        cube13.setMaterial(cubeFace);
+        cubeThirteen.getChildren().add(cube13);
+        cubePane.getChildren().add(cubeThirteen);
+        
+        /*MeshView cube14 = new MeshView(m[1][1][1]); //Redundant?
+        cube14.setCullFace(CullFace.FRONT);
+        cube14.setDrawMode(DrawMode.FILL);
+        cube14.setMaterial(cubeFace);
+        cubeFourteen.getChildren().add(cube14);
+        cubePane.getChildren().add(cubeFourteen);*/
+        
+        MeshView cube15 = new MeshView(m[1][1][2]);
+        cube15.setCullFace(CullFace.FRONT);
+        cube15.setDrawMode(DrawMode.FILL);
+        cube15.setMaterial(cubeFace);
+        cubeFifteen.getChildren().add(cube15);
+        cubePane.getChildren().add(cubeFifteen);
+        
+        MeshView cube16 = new MeshView(m[1][2][0]);
+        cube16.setCullFace(CullFace.FRONT);
+        cube16.setDrawMode(DrawMode.FILL);
+        cube16.setMaterial(cubeFace);
+        cubeSixteen.getChildren().add(cube16);
+        cubePane.getChildren().add(cubeSixteen);
+        
+        MeshView cube17 = new MeshView(m[1][2][1]);
+        cube17.setCullFace(CullFace.FRONT);
+        cube17.setDrawMode(DrawMode.FILL);
+        cube17.setMaterial(cubeFace);
+        cubeSeventeen.getChildren().add(cube17);
+        cubePane.getChildren().add(cubeSeventeen);
+        
+        MeshView cube18 = new MeshView(m[1][2][2]);
+        cube18.setCullFace(CullFace.FRONT);
+        cube18.setDrawMode(DrawMode.FILL);
+        cube18.setMaterial(cubeFace);
+        cubeEighteen.getChildren().add(cube18);
+        cubePane.getChildren().add(cubeEighteen);
+        
+        MeshView cube19 = new MeshView(m[2][0][0]);
+        cube19.setCullFace(CullFace.FRONT);
+        cube19.setDrawMode(DrawMode.FILL);
+        cube19.setMaterial(cubeFace);
+        cubeNineteen.getChildren().add(cube19);
+        cubePane.getChildren().add(cubeNineteen);
+        
+        MeshView cube20 = new MeshView(m[2][0][1]);
+        cube20.setCullFace(CullFace.FRONT);
+        cube20.setDrawMode(DrawMode.FILL);
+        cube20.setMaterial(cubeFace);
+        cubeTwenty.getChildren().add(cube20);
+        cubePane.getChildren().add(cubeTwenty);
+        
+        MeshView cube21 = new MeshView(m[2][0][2]);
+        cube21.setCullFace(CullFace.FRONT);
+        cube21.setDrawMode(DrawMode.FILL);
+        cube21.setMaterial(cubeFace);
+        cubeTwentyOne.getChildren().add(cube21);
+        cubePane.getChildren().add(cubeTwentyOne);
+        
+        MeshView cube22 = new MeshView(m[2][1][0]);
+        cube22.setCullFace(CullFace.FRONT);
+        cube22.setDrawMode(DrawMode.FILL);
+        cube22.setMaterial(cubeFace);
+        cubeTwentyTwo.getChildren().add(cube22);
+        cubePane.getChildren().add(cubeTwentyTwo);
+        
+        MeshView cube23 = new MeshView(m[2][1][1]);
+        cube23.setCullFace(CullFace.FRONT);
+        cube23.setDrawMode(DrawMode.FILL);
+        cube23.setMaterial(cubeFace);
+        cubeTwentyThree.getChildren().add(cube23);
+        cubePane.getChildren().add(cubeTwentyThree);
+        
+        MeshView cube24 = new MeshView(m[2][1][2]);
+        cube24.setCullFace(CullFace.FRONT);
+        cube24.setDrawMode(DrawMode.FILL);
+        cube24.setMaterial(cubeFace);
+        cubeTwentyFour.getChildren().add(cube24);
+        cubePane.getChildren().add(cubeTwentyFour);
+        
+        MeshView cube25 = new MeshView(m[2][2][0]);
+        cube25.setCullFace(CullFace.FRONT);
+        cube25.setDrawMode(DrawMode.FILL);
+        cube25.setMaterial(cubeFace);
+        cubeTwentyFive.getChildren().add(cube25);
+        cubePane.getChildren().add(cubeTwentyFive);
+        
+        MeshView cube26 = new MeshView(m[2][2][1]);
+        cube26.setCullFace(CullFace.FRONT);
+        cube26.setDrawMode(DrawMode.FILL);
+        cube26.setMaterial(cubeFace);
+        cubeTwentySix.getChildren().add(cube26);
+        cubePane.getChildren().add(cubeTwentySix);
+        
+        MeshView cube27 = new MeshView(m[2][2][2]);
+        cube27.setCullFace(CullFace.FRONT);
+        cube27.setDrawMode(DrawMode.FILL);
+        cube27.setMaterial(cubeFace);
+        cubeTwentySeven.getChildren().add(cube27);
+        cubePane.getChildren().add(cubeTwentySeven);
         //------------------------------------------------------------------------------------------------------------------------------------------------
         PhongMaterial blackMaterial = new PhongMaterial(); //Material created for Center of Rubik's Cube
         blackMaterial.setDiffuseColor(Color.BLACK); //Base Color of Center Cube is Black
