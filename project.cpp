@@ -1,5 +1,7 @@
 #include <iostream>
 #include "opengl.h"
+#include <math.h>
+
 
 using namespace std;
 
